@@ -4,33 +4,29 @@ import astryxion.chunkanimator.config.AnimationMode;
 import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.Map;
 import java.util.Objects;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class handles setting up and rendering the animations.
  *
  * @author lumien231
  */
-@OnlyIn(Dist.CLIENT)
 public final class AnimationHandler {
 
-    private final Minecraft mc = Minecraft.getInstance();
-    private final WeakHashMap<SectionRenderDispatcher.RenderSection, AnimationData> timeStamps = new WeakHashMap<>();
+    private final Map<Long, AnimationData> timeStamps = new ConcurrentHashMap<>();
 
-    public void preRender(PreRenderContext context) {
-        final var animationData = timeStamps.get(context.renderSection());
+    public Offset preRender(PreRenderContext context) {
+        final long key = context.origin().asLong();
+        final var animationData = timeStamps.get(key);
 
         if (animationData == null) {
-            context.uniform().set(context.x(), context.y(), context.z());
-            return;
+            return Offset.ZERO;
         }
 
         final var mode = ChunkAnimatorConfig.MODE.get();
@@ -38,7 +34,6 @@ public final class AnimationHandler {
 
         long time = animationData.timeStamp;
 
-        // If preRender hasn't been called on this chunk yet, prepare to start the animation.
         if (time == -1L) {
             time = System.currentTimeMillis();
             animationData.timeStamp = time;
@@ -48,67 +43,50 @@ public final class AnimationHandler {
         final long timeDif = System.currentTimeMillis() - time;
 
         if (timeDif < animationDuration) {
-            ChunkAnimatorConfig.MODE.get().contextConsumer().accept(new AnimationContext(
-                    context.renderSection(),
-                    context.uniform(),
-                    context.x(),
-                    context.y(),
-                    context.z(),
+            Minecraft mc = Minecraft.getInstance();
+            if (mc == null || mc.level == null) {
+                return Offset.ZERO;
+            }
+            return ChunkAnimatorConfig.MODE.get().contextConsumer().apply(new AnimationContext(
                     animationData,
-                    context.renderSection().getOrigin(),
+                    context.origin(),
                     timeDif,
-                    AnimationContext.LevelContext.from(Objects.requireNonNull(this.mc.level))
+                    AnimationContext.LevelContext.from(Objects.requireNonNull(mc.level))
             ));
         } else {
-            context.uniform().set(context.x(), context.y(), context.z());
-            this.timeStamps.remove(context.renderSection());
+            return Offset.ZERO;
         }
     }
 
-    public void setOrigin(final SectionRenderDispatcher.RenderSection renderSection, final BlockPos pos) {
-        if (this.mc.player == null)
+    public void setOrigin(final BlockPos pos) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.player == null) {
             return;
+        }
 
-        final BlockPos zeroedPlayerPos = getZeroedPlayerPos(this.mc.player);
+        final BlockPos zeroedPlayerPos = getZeroedPlayerPos(mc.player);
         final BlockPos zeroedCenteredChunkPos = getZeroedCenteredChunkPos(pos);
+        final long key = pos.asLong();
 
         if (!ChunkAnimatorConfig.DISABLE_AROUND_PLAYER.get() || zeroedPlayerPos.distSqr(zeroedCenteredChunkPos) > (64 * 64)) {
-            timeStamps.put(renderSection, new AnimationData(-1L, ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE ?
-                    getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos)) : null));
+            final Direction facing = ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE
+                    ? getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos))
+                    : null;
+            timeStamps.putIfAbsent(key, new AnimationData(-1L, facing));
         } else {
-            timeStamps.remove(renderSection);
+            timeStamps.remove(key);
         }
     }
 
-    /**
-     * Gets the given player's position, setting their {@code y-coordinate} to {@code 0}.
-     *
-     * @param player The {@link LocalPlayer} instance.
-     * @return The zeroed {@link BlockPos}.
-     */
     public static BlockPos getZeroedPlayerPos(final LocalPlayer player) {
         final BlockPos playerPos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
         return playerPos.offset(0, -player.getBlockY(), 0);
     }
 
-    /**
-     * Gets the given {@link BlockPos} for the chunk, setting its {@code y-coordinate} to
-     * {@code 0} and offsetting its {@code x} and {@code y-coordinate} to by {@code 8}.
-     *
-     * @param position The {@link BlockPos} of the chunk.
-     * @return The zeroed, centered {@link BlockPos}.
-     */
     public static BlockPos getZeroedCenteredChunkPos(final BlockPos position) {
         return position.offset(8, -position.getY(), 8);
     }
 
-    /**
-     * Gets the direction the chunk is facing based on the given {@link Vec3i}
-     * from the relevant position to the chunk.
-     *
-     * @param dif The {@link Vec3i} distance from the relevant position to the chunk.
-     * @return The {@link Direction} of the chunk relative to the {@code dif}.
-     */
     public static Direction getChunkFacing(final Vec3i dif) {
         final int difX = Math.abs(dif.getX());
         final int difZ = Math.abs(dif.getZ());
@@ -117,8 +95,11 @@ public final class AnimationHandler {
     }
 
     public void clear() {
-        // These should be cleared by GC, but just in case.
         this.timeStamps.clear();
+    }
+
+    public record Offset(float x, float y, float z) {
+        public static final Offset ZERO = new Offset(0, 0, 0);
     }
 
     public static class AnimationData {
@@ -130,6 +111,4 @@ public final class AnimationHandler {
             this.chunkFacing = chunkFacing;
         }
     }
-
 }
-
