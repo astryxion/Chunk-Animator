@@ -11,8 +11,8 @@ displayName="${mod_name}"
 modId="${mod_id}"
 version="${mod_version}"
 
-authors="Astryxion"
-credits="Astryxion, Lumien"
+authors="${mod_authors}"
+credits="${mod_credits}"
 
 description='''
 A small client side mod that animates the appeareance of chunks so that they don't just instantly appear.

@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "chunkanimator.refmap.json",
   "mixins": [
-    "LevelRendererMixin",
-    "RenderSectionMixin"
+    "LevelRendererMixin"
   ],
   "minVersion": "0.8.5"
 }

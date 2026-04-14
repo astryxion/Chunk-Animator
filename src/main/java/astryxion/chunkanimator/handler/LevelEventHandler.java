@@ -2,8 +2,6 @@ package astryxion.chunkanimator.handler;
 
 import astryxion.chunkanimator.ChunkAnimator;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
@@ -13,7 +11,6 @@ import net.neoforged.neoforge.event.level.LevelEvent;
  *
  * @author Harley O'Connor
  */
-@OnlyIn(Dist.CLIENT)
 public final class LevelEventHandler {
 
     private static final AnimationHandler HANDLER = ChunkAnimator.instance.animationHandler;
