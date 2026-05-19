@@ -19,10 +19,16 @@ public final class ChunkAnimatorConfig {
 	/** Disable around player - disables animation of chunks near the player. */
 	public static final ModConfigSpec.BooleanValue DISABLE_AROUND_PLAYER;
 
+	/** Master switch for chunk load animations. */
+	public static final ModConfigSpec.BooleanValue ANIMATIONS_ENABLED;
+
 	public static final ModConfigSpec SPEC;
 
 	static {
 		final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+		ANIMATIONS_ENABLED = builder.comment("If disabled, chunks will appear instantly without animation.")
+				.define("animationsEnabled", true);
 
 		MODE = builder.comment("""
 				Defines how the chunks should be animated.
@@ -45,6 +51,10 @@ public final class ChunkAnimatorConfig {
 				.define("disableAroundPlayer", false);
 
 		SPEC = builder.build();
+	}
+
+	public static boolean areAnimationsEnabled() {
+		return ANIMATIONS_ENABLED.get();
 	}
 
 	private ChunkAnimatorConfig() {}

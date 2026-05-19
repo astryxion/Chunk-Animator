@@ -21,6 +21,12 @@ A small client side mod that animates the appeareance of chunks so that they don
 [[mixins]]
 config="${mod_id}.mixins.json"
 
+[[mixins]]
+config="${mod_id}.compat.sodium.mixins.json"
+
+[[mixins]]
+config="${mod_id}.compat.embeddium.mixins.json"
+
 displayURL="https://www.curseforge.com/minecraft/mc-mods/chunk-animator"
 updateJSONURL="https://github.com/Harleyoc1/ChunkAnimator/blob/1.21/version_info.json?raw=true"
 
@@ -37,3 +43,17 @@ updateJSONURL="https://github.com/Harleyoc1/ChunkAnimator/blob/1.21/version_info
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="sodium"
+    type="optional"
+    versionRange="[0.6.0,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="embeddium"
+    type="optional"
+    versionRange="[0.5.0,)"
+    ordering="NONE"
+    side="CLIENT"

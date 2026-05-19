@@ -15,7 +15,7 @@ import static astryxion.chunkanimator.handler.AnimationHandler.*;
  * @author Harley O'Connor
  */
 public enum AnimationMode {
-    BELOW(context -> context.uniform().set(
+    BELOW(context -> context.offset().set(
             context.x(),
             context.y() - Math.abs(context.origin().getY()) + getFunctionValue(
                     context.timeDif(),
@@ -25,7 +25,7 @@ public enum AnimationMode {
             ),
             context.z()
     )),
-    ABOVE(context -> context.uniform().set(
+    ABOVE(context -> context.offset().set(
             context.x(),
             context.y() + context.levelContext().maxY() - Math.abs(context.origin().getY()) - getFunctionValue(
                     context.timeDif(),
@@ -48,7 +48,7 @@ public enum AnimationMode {
             final var vec = chunkFacing.getNormal();
             final var mod = -(200F - getFunctionValue(context.timeDif(), 0, 200, ChunkAnimatorConfig.ANIMATION_DURATION.get()));
 
-            context.uniform().set(context.x() + vec.getX() * mod, context.y(), context.z() +  vec.getZ() * mod);
+            context.offset().set(context.x() + vec.getX() * mod, context.y(), context.z() +  vec.getZ() * mod);
         }
     }),
     HORIZONTAL_SLIDE_ALTERNATE(

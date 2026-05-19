@@ -1,6 +1,5 @@
 package astryxion.chunkanimator.handler;
 
-import com.mojang.blaze3d.shaders.Uniform;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.core.BlockPos;
@@ -12,7 +11,7 @@ import net.minecraft.core.BlockPos;
  */
 public record AnimationContext(
         SectionRenderDispatcher.RenderSection renderSection,
-        Uniform uniform,
+        Float3Setter offset,
         float x,
         float y,
         float z,

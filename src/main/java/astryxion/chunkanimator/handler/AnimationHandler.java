@@ -11,6 +11,9 @@ import net.minecraft.core.Vec3i;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.util.Objects;
 import java.util.WeakHashMap;
 
@@ -24,12 +27,18 @@ public final class AnimationHandler {
 
     private final Minecraft mc = Minecraft.getInstance();
     private final WeakHashMap<SectionRenderDispatcher.RenderSection, AnimationData> timeStamps = new WeakHashMap<>();
+    private final Long2ObjectMap<AnimationData> sectionTimeStamps = new Long2ObjectOpenHashMap<>();
 
     public void preRender(PreRenderContext context) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            context.offset().set(context.x(), context.y(), context.z());
+            return;
+        }
+
         final var animationData = timeStamps.get(context.renderSection());
 
         if (animationData == null) {
-            context.uniform().set(context.x(), context.y(), context.z());
+            context.offset().set(context.x(), context.y(), context.z());
             return;
         }
 
@@ -50,7 +59,7 @@ public final class AnimationHandler {
         if (timeDif < animationDuration) {
             ChunkAnimatorConfig.MODE.get().contextConsumer().accept(new AnimationContext(
                     context.renderSection(),
-                    context.uniform(),
+                    context.offset(),
                     context.x(),
                     context.y(),
                     context.z(),
@@ -60,12 +69,54 @@ public final class AnimationHandler {
                     AnimationContext.LevelContext.from(Objects.requireNonNull(this.mc.level))
             ));
         } else {
-            context.uniform().set(context.x(), context.y(), context.z());
+            context.offset().set(context.x(), context.y(), context.z());
             this.timeStamps.remove(context.renderSection());
         }
     }
 
+    public AnimationData getAnimationData(long sectionPos) {
+        return this.sectionTimeStamps.get(sectionPos);
+    }
+
+    public void clearSection(long sectionPos) {
+        this.sectionTimeStamps.remove(sectionPos);
+    }
+
+    public void setOriginForSection(long sectionPos, BlockPos pos) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            this.sectionTimeStamps.remove(sectionPos);
+            return;
+        }
+
+        if (this.mc.player == null) {
+            return;
+        }
+
+        final BlockPos zeroedPlayerPos = getZeroedPlayerPos(this.mc.player);
+        final BlockPos zeroedCenteredChunkPos = getZeroedCenteredChunkPos(pos);
+
+        if (!ChunkAnimatorConfig.DISABLE_AROUND_PLAYER.get() || zeroedPlayerPos.distSqr(zeroedCenteredChunkPos) > (64 * 64)) {
+            final var mode = ChunkAnimatorConfig.MODE.get();
+            this.sectionTimeStamps.put(sectionPos, new AnimationData(-1L, mode == AnimationMode.HORIZONTAL_SLIDE || mode == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE ?
+                    getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos)) : null));
+        } else {
+            this.sectionTimeStamps.remove(sectionPos);
+        }
+    }
+
+    public void prepareSectionAnimation(long sectionPos, BlockPos origin, AnimationData animationData) {
+        if (ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE) {
+            animationData.chunkFacing = getChunkFacing(getZeroedPlayerPos(Objects.requireNonNull(this.mc.player))
+                    .subtract(getZeroedCenteredChunkPos(origin)));
+        }
+    }
+
     public void setOrigin(final SectionRenderDispatcher.RenderSection renderSection, final BlockPos pos) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            this.timeStamps.remove(renderSection);
+            return;
+        }
+
         if (this.mc.player == null)
             return;
 
@@ -73,7 +124,8 @@ public final class AnimationHandler {
         final BlockPos zeroedCenteredChunkPos = getZeroedCenteredChunkPos(pos);
 
         if (!ChunkAnimatorConfig.DISABLE_AROUND_PLAYER.get() || zeroedPlayerPos.distSqr(zeroedCenteredChunkPos) > (64 * 64)) {
-            timeStamps.put(renderSection, new AnimationData(-1L, ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE ?
+            final var mode = ChunkAnimatorConfig.MODE.get();
+            timeStamps.put(renderSection, new AnimationData(-1L, mode == AnimationMode.HORIZONTAL_SLIDE || mode == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE ?
                     getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos)) : null));
         } else {
             timeStamps.remove(renderSection);
@@ -119,6 +171,7 @@ public final class AnimationHandler {
     public void clear() {
         // These should be cleared by GC, but just in case.
         this.timeStamps.clear();
+        this.sectionTimeStamps.clear();
     }
 
     public static class AnimationData {

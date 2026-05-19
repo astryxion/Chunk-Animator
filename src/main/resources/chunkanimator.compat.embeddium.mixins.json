@@ -1,16 +1,12 @@
 {
   "required": true,
-  "package": "astryxion.chunkanimator.mixin",
+  "package": "astryxion.chunkanimator.compat.embeddium.mixin",
   "compatibilityLevel": "JAVA_21",
   "plugin": "astryxion.chunkanimator.compat.ChunkAnimatorMixinPlugin",
   "refmap": "chunkanimator.refmap.json",
   "mixins": [
-    "LevelRendererMixin",
-    "RenderSectionMixin"
-  ],
-  "client": [
-    "client.ConfigurationSectionScreenMixin",
-    "client.OptionsSubScreenAccessor"
+    "EmbeddiumRenderSectionMixin",
+    "EmbeddiumDefaultChunkRendererMixin"
   ],
   "minVersion": "0.8.5"
 }

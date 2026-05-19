@@ -1,6 +1,7 @@
 package astryxion.chunkanimator.mixin;
 
 import astryxion.chunkanimator.ChunkAnimator;
+import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +20,10 @@ public final class RenderSectionMixin {
             target = "Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher$RenderSection;reset()V"
     ))
     public void setOrigin(int x, int y, int z, CallbackInfo ci) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            return;
+        }
+
         ChunkAnimator.instance.animationHandler.setOrigin(
                 (SectionRenderDispatcher.RenderSection) (Object) this,
                 new BlockPos(x, y, z)

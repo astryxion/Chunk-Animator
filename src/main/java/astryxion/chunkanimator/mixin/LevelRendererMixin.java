@@ -47,7 +47,7 @@ public final class LevelRendererMixin {
         ChunkAnimator.instance.animationHandler.preRender(
                 new PreRenderContext(
                         renderSection,
-                        chunkOffset,
+                        chunkOffset::set,
                         (float) (sectionOrigin.getX() - camX),
                         (float) (sectionOrigin.getY() - camY),
                         (float) (sectionOrigin.getZ() - camZ)

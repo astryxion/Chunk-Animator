@@ -1,5 +1,6 @@
 package astryxion.chunkanimator;
 
+import astryxion.chunkanimator.client.gui.ChunkAnimatorConfigScreens;
 import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import astryxion.chunkanimator.handler.AnimationHandler;
 import astryxion.chunkanimator.handler.LevelEventHandler;
@@ -8,6 +9,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**
@@ -26,6 +28,10 @@ public final class ChunkAnimator {
 		instance = this;
 
 		modContainer.registerConfig(ModConfig.Type.CLIENT, ChunkAnimatorConfig.SPEC);
+		modContainer.registerExtensionPoint(
+				IConfigScreenFactory.class,
+				(IConfigScreenFactory) (minecraft, parent) -> ChunkAnimatorConfigScreens.create(modContainer, parent)
+		);
 
         modBus.addListener(this::setupClient);
 	}
