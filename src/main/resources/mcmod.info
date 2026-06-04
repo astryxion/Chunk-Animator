@@ -1,0 +1,15 @@
+[
+{
+  "modid": "ChunkAnimator",
+  "name": "Chunk Animator",
+  "description": "Animates the appearance of newly loaded chunks.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/chunk-animator",
+  "authorList": ["lumien"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
