@@ -4,15 +4,12 @@ import astryxion.chunkanimator.config.AnimationMode;
 import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -26,19 +23,13 @@ import java.util.WeakHashMap;
 public final class AnimationHandler {
 
     private final Minecraft mc = Minecraft.getInstance();
-    private final WeakHashMap<SectionRenderDispatcher.RenderSection, AnimationData> timeStamps = new WeakHashMap<>();
-    private final Long2ObjectMap<AnimationData> sectionTimeStamps = new Long2ObjectOpenHashMap<>();
+    private final WeakHashMap<ChunkRenderDispatcher.RenderChunk, AnimationData> timeStamps = new WeakHashMap<>();
 
     public void preRender(PreRenderContext context) {
-        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
-            context.offset().set(context.x(), context.y(), context.z());
-            return;
-        }
-
-        final var animationData = timeStamps.get(context.renderSection());
+        final var animationData = timeStamps.get(context.renderChunk());
 
         if (animationData == null) {
-            context.offset().set(context.x(), context.y(), context.z());
+            context.uniform().set(context.x(), context.y(), context.z());
             return;
         }
 
@@ -58,65 +49,23 @@ public final class AnimationHandler {
 
         if (timeDif < animationDuration) {
             ChunkAnimatorConfig.MODE.get().contextConsumer().accept(new AnimationContext(
-                    context.renderSection(),
-                    context.offset(),
+                    context.renderChunk(),
+                    context.uniform(),
                     context.x(),
                     context.y(),
                     context.z(),
                     animationData,
-                    context.renderSection().getOrigin(),
+                    context.renderChunk().getOrigin(),
                     timeDif,
                     AnimationContext.LevelContext.from(Objects.requireNonNull(this.mc.level))
             ));
         } else {
-            context.offset().set(context.x(), context.y(), context.z());
-            this.timeStamps.remove(context.renderSection());
+            context.uniform().set(context.x(), context.y(), context.z());
+            this.timeStamps.remove(context.renderChunk());
         }
     }
 
-    public AnimationData getAnimationData(long sectionPos) {
-        return this.sectionTimeStamps.get(sectionPos);
-    }
-
-    public void clearSection(long sectionPos) {
-        this.sectionTimeStamps.remove(sectionPos);
-    }
-
-    public void setOriginForSection(long sectionPos, BlockPos pos) {
-        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
-            this.sectionTimeStamps.remove(sectionPos);
-            return;
-        }
-
-        if (this.mc.player == null) {
-            return;
-        }
-
-        final BlockPos zeroedPlayerPos = getZeroedPlayerPos(this.mc.player);
-        final BlockPos zeroedCenteredChunkPos = getZeroedCenteredChunkPos(pos);
-
-        if (!ChunkAnimatorConfig.DISABLE_AROUND_PLAYER.get() || zeroedPlayerPos.distSqr(zeroedCenteredChunkPos) > (64 * 64)) {
-            final var mode = ChunkAnimatorConfig.MODE.get();
-            this.sectionTimeStamps.put(sectionPos, new AnimationData(-1L, mode == AnimationMode.HORIZONTAL_SLIDE || mode == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE ?
-                    getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos)) : null));
-        } else {
-            this.sectionTimeStamps.remove(sectionPos);
-        }
-    }
-
-    public void prepareSectionAnimation(long sectionPos, BlockPos origin, AnimationData animationData) {
-        if (ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE) {
-            animationData.chunkFacing = getChunkFacing(getZeroedPlayerPos(Objects.requireNonNull(this.mc.player))
-                    .subtract(getZeroedCenteredChunkPos(origin)));
-        }
-    }
-
-    public void setOrigin(final SectionRenderDispatcher.RenderSection renderSection, final BlockPos pos) {
-        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
-            this.timeStamps.remove(renderSection);
-            return;
-        }
-
+    public void setOrigin(final ChunkRenderDispatcher.RenderChunk renderChunk, final BlockPos pos) {
         if (this.mc.player == null)
             return;
 
@@ -124,11 +73,10 @@ public final class AnimationHandler {
         final BlockPos zeroedCenteredChunkPos = getZeroedCenteredChunkPos(pos);
 
         if (!ChunkAnimatorConfig.DISABLE_AROUND_PLAYER.get() || zeroedPlayerPos.distSqr(zeroedCenteredChunkPos) > (64 * 64)) {
-            final var mode = ChunkAnimatorConfig.MODE.get();
-            timeStamps.put(renderSection, new AnimationData(-1L, mode == AnimationMode.HORIZONTAL_SLIDE || mode == AnimationMode.HORIZONTAL_SLIDE_ALTERNATE ?
+            timeStamps.put(renderChunk, new AnimationData(-1L, ChunkAnimatorConfig.MODE.get() == AnimationMode.HORIZONTAL_SLIDE ?
                     getChunkFacing(zeroedPlayerPos.subtract(zeroedCenteredChunkPos)) : null));
         } else {
-            timeStamps.remove(renderSection);
+            timeStamps.remove(renderChunk);
         }
     }
 
@@ -171,7 +119,6 @@ public final class AnimationHandler {
     public void clear() {
         // These should be cleared by GC, but just in case.
         this.timeStamps.clear();
-        this.sectionTimeStamps.clear();
     }
 
     public static class AnimationData {
@@ -185,4 +132,3 @@ public final class AnimationHandler {
     }
 
 }
-

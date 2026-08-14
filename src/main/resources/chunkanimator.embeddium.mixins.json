@@ -4,9 +4,12 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "chunkanimator.refmap.json",
   "plugin": "astryxion.chunkanimator.mixin.ChunkAnimatorMixinPlugin",
-  "mixins": [
-    "LevelRendererMixin",
-    "RenderChunkMixin"
+  "minVersion": "0.8.5",
+  "client": [
+    "sodium.RenderSectionMixin",
+    "sodium.DefaultChunkRendererMixin"
   ],
-  "minVersion": "0.8.5"
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

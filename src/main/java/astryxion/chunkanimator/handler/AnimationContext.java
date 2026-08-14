@@ -1,7 +1,8 @@
 package astryxion.chunkanimator.handler;
 
+import astryxion.chunkanimator.util.UniformWrapper;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
 
 /**
@@ -10,8 +11,8 @@ import net.minecraft.core.BlockPos;
  * @author Harley O'Connor
  */
 public record AnimationContext(
-        SectionRenderDispatcher.RenderSection renderSection,
-        Float3Setter offset,
+        ChunkRenderDispatcher.RenderChunk renderChunk,
+        UniformWrapper<?> uniform,
         float x,
         float y,
         float z,
@@ -35,4 +36,3 @@ public record AnimationContext(
     }
 
 }
-

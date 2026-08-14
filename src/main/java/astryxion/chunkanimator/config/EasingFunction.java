@@ -1,6 +1,7 @@
 package astryxion.chunkanimator.config;
 
 import com.mojang.datafixers.util.Function4;
+import com.mojang.datafixers.util.Function5;
 import penner.easing.*;
 
 /**
@@ -29,4 +30,3 @@ public enum EasingFunction {
         return easeOutFunc;
     }
 }
-

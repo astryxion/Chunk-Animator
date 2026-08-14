@@ -2,10 +2,10 @@ package astryxion.chunkanimator.handler;
 
 import astryxion.chunkanimator.ChunkAnimator;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * Handles {@link LevelEvent}s, updating {@link AnimationHandler} properties when the world
@@ -25,7 +25,7 @@ public final class LevelEventHandler {
         }
 
         HANDLER.clear();
+        SectionAnimationTracker.clearAll();
     }
 
 }
-

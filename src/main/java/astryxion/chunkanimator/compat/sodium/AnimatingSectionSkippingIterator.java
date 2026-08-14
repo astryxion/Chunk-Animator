@@ -1,14 +1,17 @@
 package astryxion.chunkanimator.compat.sodium;
 
-import astryxion.chunkanimator.compat.indigo.IndigoSectionAnimation;
-import net.caffeinemc.mods.sodium.client.render.chunk.LocalSectionIndex;
-import net.caffeinemc.mods.sodium.client.render.chunk.region.RenderRegion;
-import net.caffeinemc.mods.sodium.client.util.iterator.ByteIterator;
+import astryxion.chunkanimator.handler.SectionAnimationTracker;
+import me.jellysquid.mods.sodium.client.render.chunk.LocalSectionIndex;
+import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
+import me.jellysquid.mods.sodium.client.util.iterator.ByteIterator;
 
 /**
- * Skips sections that are currently animating so they are not drawn in the main multi-draw batch.
+ * Skips sections that are currently animating so the fast batched draw can
+ * still run for every static section.
+ *
+ * @author Sxilverr
  */
-public final class SodiumAnimatingSectionSkippingIterator implements ByteIterator {
+public final class AnimatingSectionSkippingIterator implements ByteIterator {
 
     private final ByteIterator delegate;
     private final int regionChunkX;
@@ -17,7 +20,7 @@ public final class SodiumAnimatingSectionSkippingIterator implements ByteIterato
     private int next;
     private boolean hasNext;
 
-    public SodiumAnimatingSectionSkippingIterator(ByteIterator delegate, RenderRegion region) {
+    public AnimatingSectionSkippingIterator(ByteIterator delegate, RenderRegion region) {
         this.delegate = delegate;
         this.regionChunkX = region.getChunkX();
         this.regionChunkY = region.getChunkY();
@@ -31,7 +34,7 @@ public final class SodiumAnimatingSectionSkippingIterator implements ByteIterato
             int cx = regionChunkX + LocalSectionIndex.unpackX(idx);
             int cy = regionChunkY + LocalSectionIndex.unpackY(idx);
             int cz = regionChunkZ + LocalSectionIndex.unpackZ(idx);
-            if (!IndigoSectionAnimation.isAnimating(cx, cy, cz)) {
+            if (!SectionAnimationTracker.isAnimating(cx, cy, cz)) {
                 next = idx;
                 hasNext = true;
                 return;
@@ -51,4 +54,5 @@ public final class SodiumAnimatingSectionSkippingIterator implements ByteIterato
         advance();
         return result;
     }
+
 }

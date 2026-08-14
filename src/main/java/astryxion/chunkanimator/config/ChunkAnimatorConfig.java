@@ -1,6 +1,8 @@
 package astryxion.chunkanimator.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 
 /**
  * @author lumien231
@@ -8,27 +10,21 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class ChunkAnimatorConfig {
 
 	/** The animation mode - controls how the chunks should be animated. */
-	public static final ModConfigSpec.EnumValue<AnimationMode> MODE;
+	public static final ForgeConfigSpec.EnumValue<AnimationMode> MODE;
 
 	/** The easing function - controls which easing function should be used. */
-	public static final ModConfigSpec.EnumValue<EasingFunction> EASING_FUNCTION;
+	public static final ForgeConfigSpec.EnumValue<EasingFunction> EASING_FUNCTION;
 
 	/** The animation duration - controls how long the animation should last (in milliseconds). */
-	public static final ModConfigSpec.IntValue ANIMATION_DURATION;
+	public static final IntValue ANIMATION_DURATION;
 	
 	/** Disable around player - disables animation of chunks near the player. */
-	public static final ModConfigSpec.BooleanValue DISABLE_AROUND_PLAYER;
+	public static final BooleanValue DISABLE_AROUND_PLAYER;
 
-	/** Master switch for chunk load animations. */
-	public static final ModConfigSpec.BooleanValue ANIMATIONS_ENABLED;
-
-	public static final ModConfigSpec SPEC;
+	public static final ForgeConfigSpec SPEC;
 
 	static {
-		final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
-
-		ANIMATIONS_ENABLED = builder.comment("If disabled, chunks will appear instantly without animation.")
-				.define("animationsEnabled", true);
+		final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
 		MODE = builder.comment("""
 				Defines how the chunks should be animated.
@@ -53,11 +49,6 @@ public final class ChunkAnimatorConfig {
 		SPEC = builder.build();
 	}
 
-	public static boolean areAnimationsEnabled() {
-		return ANIMATIONS_ENABLED.get();
-	}
-
 	private ChunkAnimatorConfig() {}
 
 }
-

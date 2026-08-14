@@ -15,7 +15,7 @@ import static astryxion.chunkanimator.handler.AnimationHandler.*;
  * @author Harley O'Connor
  */
 public enum AnimationMode {
-    BELOW(context -> context.offset().set(
+    BELOW(context -> context.uniform().set(
             context.x(),
             context.y() - Math.abs(context.origin().getY()) + getFunctionValue(
                     context.timeDif(),
@@ -25,7 +25,7 @@ public enum AnimationMode {
             ),
             context.z()
     )),
-    ABOVE(context -> context.offset().set(
+    ABOVE(context -> context.uniform().set(
             context.x(),
             context.y() + context.levelContext().maxY() - Math.abs(context.origin().getY()) - getFunctionValue(
                     context.timeDif(),
@@ -48,13 +48,13 @@ public enum AnimationMode {
             final var vec = chunkFacing.getNormal();
             final var mod = -(200F - getFunctionValue(context.timeDif(), 0, 200, ChunkAnimatorConfig.ANIMATION_DURATION.get()));
 
-            context.offset().set(context.x() + vec.getX() * mod, context.y(), context.z() +  vec.getZ() * mod);
+            context.uniform().set(context.x() + vec.getX() * mod, context.y(), context.z() +  vec.getZ() * mod);
         }
     }),
     HORIZONTAL_SLIDE_ALTERNATE(
             (context, data) ->
                     data.chunkFacing = getChunkFacing(getZeroedPlayerPos(Objects.requireNonNull(Minecraft.getInstance().player))
-                            .subtract(getZeroedCenteredChunkPos(context.renderSection().getOrigin()))
+                            .subtract(getZeroedCenteredChunkPos(context.renderChunk().getOrigin()))
                     ),
             HORIZONTAL_SLIDE.contextConsumer
     );
@@ -83,4 +83,3 @@ public enum AnimationMode {
         return ChunkAnimatorConfig.EASING_FUNCTION.get().easeOutFunc().apply(t, b, c, d);
     }
 }
-

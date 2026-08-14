@@ -1,0 +1,51 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+
+license="MIT"
+
+[[mods]]
+modId="chunkanimator"
+version="${file.jarVersion}"
+displayName="Chunk Animator"
+authors="Astryxion"
+credits="Astryxion, Lumien"
+description='''
+Animate chunks as they load! Instead of appearing instantly, chunks rise from below, drop from above, or slide in from the side.
+
+Unlike the original 1.20.1 version, this build is compatible with modern rendering mods such as Embeddium, Xenon, and Rubidium.
+'''
+
+[[dependencies.chunkanimator]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47.0.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.chunkanimator]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.chunkanimator]]
+    modId="embeddium"
+    mandatory=false
+    versionRange="[0.3,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+[[dependencies.chunkanimator]]
+    modId="xenon"
+    mandatory=false
+    versionRange="[0.3,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+[[dependencies.chunkanimator]]
+    modId="rubidium"
+    mandatory=false
+    versionRange="[0.7,)"
+    ordering="AFTER"
+    side="CLIENT"

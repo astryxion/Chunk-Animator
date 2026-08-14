@@ -1,16 +1,20 @@
 package astryxion.chunkanimator;
 
-import astryxion.chunkanimator.client.gui.ChunkAnimatorConfigScreens;
 import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import astryxion.chunkanimator.handler.AnimationHandler;
 import astryxion.chunkanimator.handler.LevelEventHandler;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author lumien231
@@ -20,32 +24,38 @@ public final class ChunkAnimator {
 
 	public static final String MOD_ID = "chunkanimator";
 
+	private static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
 	public static ChunkAnimator instance;
 
 	public AnimationHandler animationHandler;
 
-	public ChunkAnimator(IEventBus modBus, ModContainer modContainer) {
+	public ChunkAnimator() {
 		instance = this;
 
-		modContainer.registerConfig(ModConfig.Type.CLIENT, ChunkAnimatorConfig.SPEC);
-		modContainer.registerExtensionPoint(
-				IConfigScreenFactory.class,
-				(IConfigScreenFactory) (minecraft, parent) -> ChunkAnimatorConfigScreens.create(modContainer, parent)
+		final var loadingContext = ModLoadingContext.get();
+		loadingContext.registerExtensionPoint(
+				IExtensionPoint.DisplayTest.class,
+				() -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true)
 		);
+		loadingContext.registerConfig(ModConfig.Type.CLIENT, ChunkAnimatorConfig.SPEC);
 
-        modBus.addListener(this::setupClient);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
+
+		if (ModList.get().isLoaded("chunkanimatorembeddiumcompat")) {
+			LOGGER.warn("Chunk Animator Embeddium Compat is no longer needed; Embeddium/Xenon support is built in. You can remove chunkanimatorembeddiumcompat.");
+		}
 	}
 
 	/**
-	 * Performs setup tasks that should only be run on the client. {@link net.minecraft.client.renderer.chunk.SectionRenderDispatcher.RenderSection#setOrigin(int, int, int)}
+	 * Performs setup tasks that should only be run on the client. {@link ChunkRenderDispatcher.RenderChunk#setOrigin(int, int, int)}
 	 *
 	 * @param event The {@link FMLClientSetupEvent} instance.
 	 */
 	private void setupClient(final FMLClientSetupEvent event) {
 		this.animationHandler = new AnimationHandler();
 
-		NeoForge.EVENT_BUS.register(new LevelEventHandler());
+		MinecraftForge.EVENT_BUS.register(new LevelEventHandler());
 	}
 
 }
-

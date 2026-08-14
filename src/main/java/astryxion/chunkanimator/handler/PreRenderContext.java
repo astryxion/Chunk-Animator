@@ -1,7 +1,8 @@
 package astryxion.chunkanimator.handler;
 
+import astryxion.chunkanimator.util.UniformWrapper;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 
 /**
  * Holds context gathered from the {@link LevelRenderer} required for pre-rendering
@@ -10,10 +11,9 @@ import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
  * @author Harley O'Connor
  */
 public record PreRenderContext(
-        SectionRenderDispatcher.RenderSection renderSection,
-        Float3Setter offset,
+        ChunkRenderDispatcher.RenderChunk renderChunk,
+        UniformWrapper<?> uniform,
         float x,
         float y,
         float z
 ) { }
-

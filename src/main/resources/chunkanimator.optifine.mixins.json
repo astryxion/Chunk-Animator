@@ -5,7 +5,7 @@
   "refmap": "chunkanimator.refmap.json",
   "plugin": "astryxion.chunkanimator.mixin.ChunkAnimatorMixinPlugin",
   "mixins": [
-    "LevelRendererMixin",
+    "OptiFineLevelRendererMixin",
     "RenderChunkMixin"
   ],
   "minVersion": "0.8.5"

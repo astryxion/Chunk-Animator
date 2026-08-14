@@ -1,8 +1,7 @@
 package astryxion.chunkanimator.mixin;
 
 import astryxion.chunkanimator.ChunkAnimator;
-import astryxion.chunkanimator.config.ChunkAnimatorConfig;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,23 +11,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Harley O'Connor
  */
-@Mixin(SectionRenderDispatcher.RenderSection.class)
-public final class RenderSectionMixin {
+@Mixin(ChunkRenderDispatcher.RenderChunk.class)
+public final class RenderChunkMixin {
 
     @Inject(method = "setOrigin", at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher$RenderSection;reset()V"
+            target = "Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;reset()V"
     ))
     public void setOrigin(int x, int y, int z, CallbackInfo ci) {
-        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
-            return;
-        }
-
         ChunkAnimator.instance.animationHandler.setOrigin(
-                (SectionRenderDispatcher.RenderSection) (Object) this,
+                (ChunkRenderDispatcher.RenderChunk) (Object) this,
                 new BlockPos(x, y, z)
         );
     }
 
 }
-
