@@ -22,6 +22,10 @@ public final class AnimationHandler {
     private final Map<Long, AnimationData> timeStamps = new ConcurrentHashMap<>();
 
     public Offset preRender(PreRenderContext context) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            return Offset.ZERO;
+        }
+
         final long key = context.origin().asLong();
         final var animationData = timeStamps.get(key);
 
@@ -53,12 +57,37 @@ public final class AnimationHandler {
                     timeDif,
                     AnimationContext.LevelContext.from(Objects.requireNonNull(mc.level))
             ));
-        } else {
-            return Offset.ZERO;
         }
+
+        return Offset.ZERO;
+    }
+
+    public boolean isAnimating(final BlockPos origin) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            return false;
+        }
+
+        final var animationData = this.timeStamps.get(origin.asLong());
+        if (animationData == null) {
+            return false;
+        }
+
+        if (animationData.timeStamp == -1L) {
+            return true;
+        }
+
+        return System.currentTimeMillis() - animationData.timeStamp < ChunkAnimatorConfig.ANIMATION_DURATION.get();
+    }
+
+    public void clearOrigin(final BlockPos origin) {
+        this.timeStamps.remove(origin.asLong());
     }
 
     public void setOrigin(final BlockPos pos) {
+        if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+            return;
+        }
+
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.player == null) {
             return;

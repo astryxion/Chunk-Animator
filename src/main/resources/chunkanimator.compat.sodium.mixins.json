@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "astryxion.chunkanimator.compat.sodium.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "astryxion.chunkanimator.compat.ChunkAnimatorMixinPlugin",
+  "refmap": "chunkanimator.refmap.json",
+  "mixins": [
+    "SodiumRenderSectionMixin",
+    "SodiumChunkRenderListAccessor",
+    "SodiumShaderChunkRendererMixin",
+    "SodiumDefaultChunkRendererMixin",
+    "SodiumDefaultShaderInterfaceMixin"
+  ],
+  "minVersion": "0.8.5"
+}

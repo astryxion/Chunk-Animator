@@ -19,10 +19,10 @@ public final class RenderSectionMixin {
             target = "Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher$RenderSection;reset()V"
     ))
     public void setOrigin(int x, int y, int z, CallbackInfo ci) {
-        ChunkAnimator.instance.animationHandler.setOrigin(
-                (SectionRenderDispatcher.RenderSection) (Object) this,
-                new BlockPos(x, y, z)
-        );
+        if (ChunkAnimator.instance == null || ChunkAnimator.instance.animationHandler == null) {
+            return;
+        }
+        ChunkAnimator.instance.animationHandler.setOrigin(new BlockPos(x, y, z));
     }
 
 }

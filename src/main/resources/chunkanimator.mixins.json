@@ -2,6 +2,7 @@
   "required": true,
   "package": "astryxion.chunkanimator.mixin",
   "compatibilityLevel": "JAVA_25",
+  "plugin": "astryxion.chunkanimator.compat.ChunkAnimatorMixinPlugin",
   "refmap": "chunkanimator.refmap.json",
   "mixins": [
     "LevelRendererMixin"

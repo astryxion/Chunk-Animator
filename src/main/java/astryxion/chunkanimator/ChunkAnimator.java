@@ -1,5 +1,6 @@
 package astryxion.chunkanimator;
 
+import astryxion.chunkanimator.client.gui.ChunkAnimatorConfigScreens;
 import astryxion.chunkanimator.config.ChunkAnimatorConfig;
 import astryxion.chunkanimator.handler.AnimationHandler;
 import astryxion.chunkanimator.handler.LevelEventHandler;
@@ -8,7 +9,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**
@@ -31,8 +34,18 @@ public final class ChunkAnimator {
 		this.animationHandler = new AnimationHandler();
 
 		modContainer.registerConfig(ModConfig.Type.CLIENT, ChunkAnimatorConfig.SPEC);
+		modContainer.registerExtensionPoint(IConfigScreenFactory.class, ChunkAnimatorConfigScreens::create);
+		modBus.addListener(this::onConfigReloading);
+		modBus.addListener(this::setupClient);
+	}
 
-        modBus.addListener(this::setupClient);
+	private void onConfigReloading(final ModConfigEvent.Reloading event) {
+		if (event.getConfig().getSpec() != ChunkAnimatorConfig.SPEC || this.animationHandler == null) {
+			return;
+		}
+		if (!ChunkAnimatorConfig.areAnimationsEnabled()) {
+			this.animationHandler.clear();
+		}
 	}
 
 	/**

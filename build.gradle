@@ -113,6 +113,9 @@ configurations {
 }
 
 dependencies {
+    // Published Sodium NeoForge artifacts wrap classes in a nested jar-in-jar; compile against the extracted mod jar.
+    compileOnly files("libs/sodium-0.9.1+mc26.1.2.jar")
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
